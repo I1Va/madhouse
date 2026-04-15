@@ -1,6 +1,6 @@
-#pragma once
+// #pragma once
 
-#include "API/server.hpp"
+// #include "API/server.hpp"
 
-void npc3_init(api::IServer &server, api::Cord tile_cord);
-void npc3_step(api::IServer &server);
+// void npc3_init(IServer &server, Cord tile_cord);
+// void npc3_step(IServer &server);

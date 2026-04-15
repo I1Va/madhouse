@@ -11,7 +11,7 @@ namespace client
 
 struct Tank {
     Vec2f pos;
-    api::Dir dir;
+    Dir dir;
     Vec2f hitbox_sz;
     // delay of shooting
     // hp
@@ -22,24 +22,24 @@ struct Bullet {
     static constexpr float bullet_tile_scale=0.7;
 
     Vec2f pos;
-    api::Dir dir;
+    Dir dir;
     Vec2f hitbox_sz;
-    api::BulletId id;
+    BulletId id;
 
     Bullet() = default;
 };
 
 class ClientWorld {
     uint64_t tick_;
-    api::GameMap map_;
+    GameMap map_;
     std::vector<Tank> tanks_;
     
-    std::unordered_set<api::BulletId> prev_bullets_;
+    std::unordered_set<BulletId> prev_bullets_;
     std::vector<Bullet> active_bullets_;
     std::vector<Bullet> death_bullets_;
 
 public:
-    void apply_game_state(api::GameState &state) {
+    void apply_game_state(GameState &state) {
         tick_ = state.tick;
         map_ = state.map;
         
@@ -80,7 +80,7 @@ public:
     }
 
     uint64_t tick() const { return tick_; }
-    const api::GameMap &map() const { return map_; }
+    const GameMap &map() const { return map_; }
     const std::vector<Tank> &tanks() const { return tanks_; }
     const std::vector<Bullet> &active_bullets() const { return active_bullets_; }
     const std::vector<Bullet> &death_bullets() const { return death_bullets_; }

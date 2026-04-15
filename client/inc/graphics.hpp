@@ -221,23 +221,23 @@ public:
     }
 
 private:
-    static float convert_dir_to_angle(const api::Dir dir) {
+    static float convert_dir_to_angle(const Dir dir) {
         switch (dir) {
-            case api::Dir::UP: return 0;
-            case api::Dir::RIGHT: return 90;
-            case api::Dir::DOWN: return 180;
-            case api::Dir::LEFT: return 270;
-            default: assert(false && "unknown api::Dir: " && (int) dir); return 0;
+            case Dir::UP: return 0;
+            case Dir::RIGHT: return 90;
+            case Dir::DOWN: return 180;
+            case Dir::LEFT: return 270;
+            default: assert(false && "unknown Dir: " && (int) dir); return 0;
         }
     }
 
     void render_map(const ClientWorld &world) {
-        const std::vector<std::vector<api::Tile>> &grid = world.map().grid;
+        const std::vector<std::vector<Tile>> &grid = world.map().grid;
         for (size_t y = 0; y < grid.size(); y++) {
             for (size_t x = 0; x < world.map().grid[y].size(); x++) {
                 int w = world.map().tile_sz;
                 int h = world.map().tile_sz;
-                api::Tile tile = grid[y][x];
+                Tile tile = grid[y][x];
                 SDL_Rect dst_rect = {
                     static_cast<int>(x * w),
                     static_cast<int>(y * h),
@@ -245,8 +245,8 @@ private:
                     static_cast<int>(h)
                 };
                 switch (tile.type) {
-                    case api::Tile::Type::Wall:  SDL_RenderCopy(renderer_.get(), tile_texture_pack_.wall.get(), nullptr, &dst_rect); break;
-                    case api::Tile::Type::Floor: SDL_RenderCopy(renderer_.get(), tile_texture_pack_.floor.get(), nullptr, &dst_rect); break;
+                    case Tile::Type::Wall:  SDL_RenderCopy(renderer_.get(), tile_texture_pack_.wall.get(), nullptr, &dst_rect); break;
+                    case Tile::Type::Floor: SDL_RenderCopy(renderer_.get(), tile_texture_pack_.floor.get(), nullptr, &dst_rect); break;
                     default: 
                     assert(false && "invalid tile type");
                 }

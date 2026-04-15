@@ -15,7 +15,7 @@
 namespace client 
 {
 
-class Client : public api::IClient { 
+class Client : public IClient { 
     Graphics graphics_;
     ClientWorld world_;
 
@@ -31,7 +31,7 @@ public:
     }
 
     // receive game state from server
-    void receive(api::GameState &state) override {
+    void receive(GameState &state) override {
         world_.apply_game_state(state);
     }
 

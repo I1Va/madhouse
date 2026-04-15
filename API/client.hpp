@@ -1,9 +1,5 @@
 #pragma once
 
-
-namespace api
-{
-
 struct GameState;
 
 struct Input {};
@@ -21,5 +17,3 @@ public:
     // optional: check connection
     virtual bool isConnected() const = 0;
 };
-
-}

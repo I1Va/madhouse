@@ -14,7 +14,7 @@
 
 namespace textmsg {
 
-class Message;
+struct Message;
 class Client;
 class Server;
 class Plugin;
@@ -56,6 +56,12 @@ public:
 class Server
 {
 public:
+    // sketch -----------
+    // virtual void addClient(Client *client) = 0; 
+
+
+    // --------
+
     /** 
      * Obtain a vector of pointers to all client.
      * This will construct a new vector.
@@ -75,7 +81,8 @@ public:
      * Register prefix to specified plugin.
      * \returns If that prefix was not taken.
      */
-    virtual bool registerPrefix(std::string_view prefix, Plugin *self);
+    virtual bool registerPrefix(std::string_view prefix, Plugin *self) = 0;
+    virtual ~Server() = default;
 };
 
 /**

@@ -13,8 +13,8 @@ find_package(SDL2_ttf REQUIRED)
 add_library(${PROJECT_NAME} INTERFACE)
 
 target_include_directories(${PROJECT_NAME} INTERFACE
-    ${PROJECT_SOURCE_DIR}/inc
-    ${PROJECT_SOURCE_DIR}/../
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    ${CMAKE_SOURCE_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME} INTERFACE
