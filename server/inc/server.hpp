@@ -11,6 +11,8 @@
 #include <cassert>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <iostream>
 
 #include "API/textmsg_server.hpp"
 // #include "API/client.hpp"
@@ -33,6 +35,7 @@ class Server : public textmsg::Server {
     // ServerWorld world_;
     
     std::vector<textmsg::Client*> clients_;
+    std::unordered_set<textmsg::Plugin*> plugins_;
     std::unordered_map<std::string, textmsg::Plugin *> prefixTable_;
 
     // std::queue<ServerCommand> comand_queue;
@@ -46,14 +49,23 @@ public:
         return clients_;
     }
 
-    bool registerPrefix(std::string_view prefix, textmsg::Plugin *self) override {
-        std::string prefixString(prefix);
-        
-        if (prefixTable_.contains(prefixString)) {
+    bool registerPlugin(textmsg::Plugin *plugin) override {
+        assert(plugin);
+        if (plugins_.contains(plugin)) {
+            std::cerr << "server already contains plugin:`" << plugin->name() << "`\n";
             return false;
         }
-       
-        prefixTable_[prefixString] = self;
+
+        plugins_.insert(plugin);
+        plugin->onServerInit(this);
+
+        for (const std::string &prefix : plugin->prefixes()) {
+            if (!registerPrefix(prefix, plugin)) {
+                std::cerr << "failed to register prefix`" << prefix << "` from plugin `" << plugin->name() << "`\n";
+                return false;
+            }
+        }
+
         return true;
     }
     
@@ -63,7 +75,17 @@ public:
 
 // TEMP
     void receive_message(textmsg::Message msg) {
+    
     } 
+private:
+    bool registerPrefix(const std::string &prefix, textmsg::Plugin *self) {        
+        if (prefixTable_.contains(prefix)) {
+            return false;
+        }
+       
+        prefixTable_[prefix] = self;
+        return true;
+    }
 
     // void update() override {
     //     for (auto launch_script : scripts_) launch_script(*this);

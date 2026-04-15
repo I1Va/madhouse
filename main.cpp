@@ -80,11 +80,14 @@
 // }
 
 #include "server.hpp"
+#include "IAMapPlugin.hpp"
 
 int main() {
+
     Server server{};
+    IAMapPlugin map_plugin{};
 
+    server.registerPlugin(&map_plugin);
 
-    
 
 }

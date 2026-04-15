@@ -8,6 +8,7 @@
 #define I_TEXTMSG_SERVER_HPP
 
 #include <cstddef>
+#include <string>
 #include <string_view>
 #include <span>
 #include <vector>
@@ -81,7 +82,7 @@ public:
      * Register prefix to specified plugin.
      * \returns If that prefix was not taken.
      */
-    virtual bool registerPrefix(std::string_view prefix, Plugin *self) = 0;
+    virtual bool registerPlugin(Plugin *self) = 0;
     virtual ~Server() = default;
 };
 
@@ -94,8 +95,11 @@ public:
 class Plugin
 {
 public:
+    virtual const std::vector<std::string> &prefixes() const = 0;
+    virtual const std::string_view name() const = 0;
     virtual void onServerInit(Server *server) = 0;
     virtual void onMessage(Client *client, const Message &msg) = 0;
+    virtual ~Plugin() = default;
 };
 
 };
