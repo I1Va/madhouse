@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(server)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -11,3 +12,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE
     ${CMAKE_SOURCE_DIR}
 )
 
+target_link_libraries(${PROJECT_NAME} INTERFACE 
+    modlib-ifc
+    modlib
+)

@@ -3,12 +3,104 @@
 #include <unordered_set>
 
 #include "vec2.hpp"
-#include "API/client.hpp"
-#include "API/server.hpp"
+// #include "API/client.hpp"
+// #include "API/server.hpp"
 
-namespace client 
-{
 
+struct Cord {
+    int x;
+    int y;
+
+    bool operator==(const Cord &other) const {
+        return x == other.x && y == other.y;
+    }
+};
+
+struct Tile {
+    enum class Type {
+        Wall,
+        Floor,
+    };
+    Type type= Type::Floor;
+};
+
+struct GameMap {
+    std::vector<std::vector<Tile>> grid;
+    size_t tile_sz=0;
+    GameMap
+    (
+        const size_t height, const size_t width,
+        const size_t itile_sz
+    ): 
+    grid(height, std::vector<Tile>(width)),
+    tile_sz(itile_sz)
+    {}
+
+    GameMap()=default;
+};
+
+using TankId = uint64_t;
+using BulletId = uint64_t;
+
+enum class Dir {
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN
+};
+
+enum class RotationDir {
+    LEFT,
+    RIGHT,
+};
+
+inline Dir get_next_dir(const Dir dir) {
+    switch (dir) {
+        case Dir::UP:    return Dir::RIGHT;
+        case Dir::RIGHT: return Dir::DOWN;
+        case Dir::DOWN:  return Dir::LEFT;
+        case Dir::LEFT:  return Dir::UP;
+        default: return Dir::UP;
+    }
+}
+
+inline Dir get_prev_dir(const Dir dir) {
+    switch (dir) {
+        case Dir::UP:    return Dir::LEFT;
+        case Dir::RIGHT: return Dir::UP;
+        case Dir::DOWN:  return Dir::RIGHT;
+        case Dir::LEFT:  return Dir::DOWN;
+        default: return Dir::UP;
+    }
+}
+
+inline Dir get_rotated_dir(const Dir dir, const RotationDir rot_dir) {
+    if (rot_dir == RotationDir::LEFT) {
+        return get_prev_dir(dir);
+    } else {
+        return get_next_dir(dir);
+    }   
+} 
+
+struct TankInfo {
+    Cord pos;
+    Dir dir;
+};
+
+struct BulletInfo {
+    Cord pos;
+    Dir dir;
+    int speed;           
+    TankId owner;  
+};
+
+struct GameState {
+    GameMap map;
+    uint64_t tick; 
+    std::vector<TankInfo> tanks;
+    std::vector<BulletInfo> bullets;
+};
+    
 struct Tank {
     Vec2f pos;
     Dir dir;
@@ -33,10 +125,7 @@ class ClientWorld {
     uint64_t tick_;
     GameMap map_;
     std::vector<Tank> tanks_;
-    
-    std::unordered_set<BulletId> prev_bullets_;
-    std::vector<Bullet> active_bullets_;
-    std::vector<Bullet> death_bullets_;
+    std::vector<Bullet> bullets_;
 
 public:
     void apply_game_state(GameState &state) {
@@ -54,11 +143,9 @@ public:
                 return tank;
             });
         
-        active_bullets_.clear();
-        death_bullets_.clear();
-    
+        bullets_.clear();
         std::transform(state.bullets.begin(), state.bullets.end(), 
-            std::back_inserter(active_bullets_),
+            std::back_inserter(bullets_),
             [&state, this](auto &bullet_info) { 
                 Bullet bullet;
                 bullet.pos = Vec2f((bullet_info.pos.x + 0.5) * state.map.tile_sz, (bullet_info.pos.y + 0.5) * state.map.tile_sz);
@@ -66,27 +153,10 @@ public:
                 bullet.hitbox_sz = Vec2f(map_.tile_sz, map_.tile_sz) * Bullet::bullet_tile_scale;
                 return bullet;
             });
-
-        for (auto &bullet : active_bullets_) {
-            if (prev_bullets_.contains(bullet.id)) {
-                death_bullets_.push_back(bullet);
-            }
-        }
-
-        prev_bullets_.clear();
-        std::transform(state.bullets.begin(), state.bullets.end(),
-               std::inserter(prev_bullets_, prev_bullets_.end()),
-               [](const auto& bullet) { return bullet.id; });
     }
 
     uint64_t tick() const { return tick_; }
     const GameMap &map() const { return map_; }
     const std::vector<Tank> &tanks() const { return tanks_; }
-    const std::vector<Bullet> &active_bullets() const { return active_bullets_; }
-    const std::vector<Bullet> &death_bullets() const { return death_bullets_; }
+    const std::vector<Bullet> &bullets() const { return bullets_; }
 };
-
-
-
-
-} // namespace client 

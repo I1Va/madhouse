@@ -8,13 +8,11 @@
 #include "SDLRAII.hpp"
 #include "SDL_utility.hpp"
 #include "err_proc.hpp"
+
 #include "client_world.hpp"
 
-#include "API/client.hpp"
-#include "API/server.hpp"
-
-namespace client 
-{
+// #include "API/client.hpp"
+// #include "API/server.hpp"
 
 struct TTF_SDL_Init_Guard {
     TTF_SDL_Init_Guard() { if (TTF_Init()!=0) throw TTFException(); }
@@ -210,7 +208,7 @@ public:
 
         render_map(world);
         
-        for (auto &bullet : world.active_bullets()) {
+        for (auto &bullet : world.bullets()) {
             render_bullet(bullet);
         }
 
@@ -325,5 +323,3 @@ private:
                         SDL_FLIP_NONE);
     }
 };
-
-} // namespace client 

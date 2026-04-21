@@ -5,7 +5,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-namespace client::raii
+namespace raii
 {
 
 struct SDLWindowDeleter   { void operator()(::SDL_Window   *p) const noexcept { if (p) SDL_DestroyWindow(p); } };
