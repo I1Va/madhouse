@@ -26,7 +26,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugins/server/map ${CMAKE_CURRENT_
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugins/server/general_logic ${CMAKE_CURRENT_BINARY_DIR}/plugins/server/general_logic)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugins/server/special_logic/tank ${CMAKE_CURRENT_BINARY_DIR}/plugins/server/special_logic/tank)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bardak_api ${CMAKE_CURRENT_BINARY_DIR}/bardak_api)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bardak ${CMAKE_CURRENT_BINARY_DIR}/bardak)
 
 add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
@@ -38,6 +38,8 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE IAMapPlugin
     PRIVATE IAGeneralLogicPlugin
     PRIVATE TankLogicPlugin
+
+    PRIVATE modlib
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

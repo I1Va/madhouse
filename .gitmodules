@@ -3,6 +3,6 @@
 	url = git@github.com:I1Va/mipt-ded-bardak.git
 	branch = textmsg
 [submodule "bardak_api"]
-	path = bardak_api
+	path = bardak
 	url = git@github.com:I1Va/mipt-ded-bardak.git
 	branch = textmsg

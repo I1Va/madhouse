@@ -1,53 +1,46 @@
-// #include <vector>
-// #include <chrono>
-// #include <map>
+#include <vector>
+#include <chrono>
+#include <map>
 
-// #include "client.hpp"
-// #include "server.hpp"
+#include "client.hpp"
+#include "modlib_manager.hpp"
+#include "server.hpp"
 
-// // #include "script1.hpp"
-// // #include "script2.hpp"
-// // #include "script3.hpp"
+const char MAP_PATH[] = "content/maps/map1";
+const size_t TILE_SZ = 50;
 
-// const char MAP_PATH[] = "content/maps/map1";
-// const size_t TILE_SZ = 50;
+const char MAP_MOD_PATH[]           = "server_plugins/map/build/ida_maplib.so";
+const char GENERAL_LOGIC_MOD_PATH[] = "server_plugins/general_logic/build/ida_maplib.so";
+const char PACMAN_MOD_PATH[]        = "server_plugins/pacman/build/ida_maplib.so";
+const char TANK_MOD_PATH[]          = "server_plugins/tank/build/ida_maplib.so";
 
-// GameMap create_game_map() {
-//     std::ifstream file(MAP_PATH);
-//     if (!file) throw std::runtime_error("failed to load map : `" + std::string(MAP_PATH) + "`");
 
-//     int height = 0;
-//     int width = 0;
-//     file >> height >> width;
-    
-//     GameMap map(height, width, TILE_SZ);
-//     std::string key;
-
-//     std::map<std::string, Tile::Type> tile_map;
-//     tile_map["Wall"] = Tile::Type::Wall;
-//     tile_map["Floor"] = Tile::Type::Floor;
-
-//     for (int y = 0; y < height; y++) {
-//         for (int x = 0; x < width; x++) {
-//             file >> key;
-//             if (!tile_map.contains(key)) key = "Floor";
-//             map.grid[y][x].type = tile_map[key];            
-//         }
-//     }
-    
-//     return map;
-// }
+#define CHECK_MOD_LOAD(mod, path)                               \
+{                                                               \
+    if (mod == nullptr) {                                       \
+        std::cerr << "failed to load mod `" << path << "`\n";   \
+        return 1;                                               \
+    }                                                           \
+}                               
 
 int main() {
-//     GameMap map = create_game_map();
+    Server server;
+    ModManager modManager;
+
+    Mod *mapMod              = modManager.loadFromFile(MAP_MOD_PATH);           CHECK_MOD_LOAD(mapMod, MAP_MOD_PATH)
+    Mod *generalGameLogicMod = modManager.loadFromFile(GENERAL_LOGIC_MOD_PATH); CHECK_MOD_LOAD(generalGameLogicMod, GENERAL_LOGIC_MOD_PATH)
+    Mod *pacmanMod           = modManager.loadFromFile(PACMAN_MOD_PATH);        CHECK_MOD_LOAD(pacmanMod, PACMAN_MOD_PATH)
+    Mod *tankMod             = modManager.loadFromFile(TANK_MOD_PATH);          CHECK_MOD_LOAD(tankMod, TANK_MOD_PATH)
+
+
+
 
 //     Client::Config config;
 //     config.gfx_config.screen_height = map.grid.size() * map.tile_sz;
 //     config.gfx_config.screen_width = map.grid[0].size() * map.tile_sz;
 
 //     Client client_game(config);
-//     Server server(map);
-
+ 
 //     // server.add_client(&client_game);
 
 //     // npc1_init(server, {3, 3});
