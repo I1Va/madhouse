@@ -1,13 +1,82 @@
 #pragma once
 
-#pragma once
-
 #include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
 
-#include "API/plugins/server/general_logic_plugin_api.hpp"
+#include "GLogicModule.hpp"
+#include "MapModule.hpp"
+
+class IDAGLogicModule : public modlib::GLogicModule {
+    Mod *mapMod_ = nullptr;
+
+public:
+    void onSetup(modlib::BmServer *server) override {
+        server->registerPrefix("game", this);
+    };
+
+    void onMessage(modlib::BmClient *client, bmsg::RawMessage msg) override {
+        std::cout << "received msg `" << msg.body() << "` from client\n";
+    };
+
+    ~IDAGLogicModule() = default;
+
+    /**
+     * Name, unique to this mod. UNIQUE, please, with author's id/repo/project id!
+     * Like "isd.bardak.game.map". Not like "Game map"!
+     * Also, please configure file name to be like this, but with ".mod" at the end,
+     * like "isd.bardak.game.map.mod".
+     */
+
+    std::string_view id() const override { 
+        return "ida.bardak.game.glogic";
+    }
+
+    std::string_view brief() const override {
+        return "I.D. Abrutin mod for general logic proccessing"
+                "Mod dispatches server messages between character, map mods";
+    }
+
+    ModVersion version() const override {
+        return ModVersion(1, 0, 0);
+    }
+
+    void onResolveDeps(ModManager *mm) override {
+        // mapMod_ = mm->anyOfType<modlib::MapModule>();
+    }
+
+    void onDepsResolved(ModManager *mm) override {
+        assert(mm);
+        assert(mapMod_);
+        // mapMod_->loadMap();
+        // for auto charMode : charModes_
+        // charMode->spawn()
+    }
+
+    void onBeforeCleanup(ModManager *mm) override {
+        std::cout << "ida general logic mod onBeforeCleanup\n";    
+    }
+};
+
+
+class IAGeneralLogicPlugin : public GeneralLogicPlugin{
+    std::string name_ = "IAGenerLogicPlugin";
+    std::vector<std::string> prefixes_ = {"general"};
+
+public:
+    IAGeneralLogicPlugin() = default;
+    ~IAGeneralLogicPlugin() = default;
+
+    const std::vector<std::string> &prefixes() const override { return prefixes_; }
+    const std::string_view name() const override { return name_; }
+    void onServerInit(textmsg::Server *server) override {
+        std::cout << name() << "onServerInit\n";
+    }
+    void onMessage(textmsg::Client *client, const textmsg::Message &msg) override {
+        std::cout << name() << "onMessage : " << msg.name << "\n";
+    }
+};
 
 // class ServerWorld { // GameWorld logic
 // private:
@@ -151,20 +220,3 @@
 //     }
 // };
 
-class IAGeneralLogicPlugin : public GeneralLogicPlugin{
-    std::string name_ = "IAGenerLogicPlugin";
-    std::vector<std::string> prefixes_ = {"general"};
-
-public:
-    IAGeneralLogicPlugin() = default;
-    ~IAGeneralLogicPlugin() = default;
-
-    const std::vector<std::string> &prefixes() const override { return prefixes_; }
-    const std::string_view name() const override { return name_; }
-    void onServerInit(textmsg::Server *server) override {
-        std::cout << name() << "onServerInit\n";
-    }
-    void onMessage(textmsg::Client *client, const textmsg::Message &msg) override {
-        std::cout << name() << "onMessage : " << msg.name << "\n";
-    }
-};

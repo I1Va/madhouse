@@ -5,8 +5,6 @@
 #include <iostream>
 #include <fstream>
 
-#include "API/plugins/server/map_plugin_api.hpp"
-
 struct Tile {
     enum class Type {
         Wall,

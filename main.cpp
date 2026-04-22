@@ -44,6 +44,7 @@ int main() {
     // Mod *pacmanMod           = modManager.loadFromFile(PACMAN_MOD_PATH);        CHECK_MOD_LOAD(pacmanMod, PACMAN_MOD_PATH)
     // Mod *tankMod             = modManager.loadFromFile(TANK_MOD_PATH);          CHECK_MOD_LOAD(tankMod, TANK_MOD_PATH)
 
+    modManager.initLoaded();
 
     Client::Config config;
     config.gfx_config.screen_height = 600;
@@ -59,9 +60,6 @@ int main() {
 //     // serverd_npc_script(npc1_step);
 //     // server.add_npc_script(npc2_step);
 //     // server.add_npc_script(npc3_step);
-
-
-
 
 
 
