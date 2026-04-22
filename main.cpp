@@ -33,25 +33,6 @@ size_t NETWORK_GET_CLIENT_ID(Client *client) {
     return reinterpret_cast<size_t>(client);
 }
 
-
-std::vector<char> generateEmptyMessage(std::string_view prefix, 
-                                       std::string_view type, 
-                                       bmsg::Id id, 
-                                       uint16_t flags = 0) {
-    // 1. Prepare the header
-    bmsg::Header head;
-    head.pref = prefix; // Uses Char64(std::string_view) constructor
-    head.type = type;
-    head.id = id;
-    head.len = 0;       // Body is empty
-    head.flags = flags;
-
-    // 2. Create buffer and copy header into it
-    std::vector<char> buffer(sizeof(bmsg::Header));
-    std::memcpy(buffer.data(), &head, sizeof(bmsg::Header));
-    return buffer;
-}
-
 int main() {
     Server server;
 
@@ -86,7 +67,7 @@ int main() {
     //     uint16_t flags;
     // };
 
-    std::vector<char> pingMsgBuf = generateEmptyMessage("core", "ping", 0);
+    std::vector<char> pingMsgBuf = bmsg::generateEmptyMessage("core", "ping", 0);
     bmsg::RawMessage pingMsg(std::string_view(pingMsgBuf.data(), pingMsgBuf.size()));
     
     server.send(&client, pingMsg);
@@ -100,25 +81,25 @@ int main() {
 
 
 
-    const int FPS = 10;
-    const int frameDelay = 1000 / FPS;
-    Uint32 frameStart;
-    int frameTime;
-    bool running = true;
-    SDL_Event e;
-    while (running) {
-        frameStart = SDL_GetTicks();
+    // const int FPS = 10;
+    // const int frameDelay = 1000 / FPS;
+    // Uint32 frameStart;
+    // int frameTime;
+    // bool running = true;
+    // SDL_Event e;
+    // while (running) {
+    //     frameStart = SDL_GetTicks();
 
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) running = 0;
-        }
+    //     while (SDL_PollEvent(&e)) {
+    //         if (e.type == SDL_QUIT) running = 0;
+    //     }
 
-        server.update();
+    //     server.update();
 
-        client.update();
+    //     client.update();
 
-        frameTime = SDL_GetTicks() - frameStart;
-        if (frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
+    //     frameTime = SDL_GetTicks() - frameStart;
+    //     if (frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
         
-    }
+    // }
 }

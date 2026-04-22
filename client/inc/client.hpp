@@ -73,19 +73,18 @@ public:
         if (!msg.isCorrect()) {
             return;
         }
+
         const bmsg::Header* head = msg.header();
-        
         std::string_view prefix = head->pref;
         std::string_view type = head->type;
-
         dispatch(prefix, type, msg.body());
     }
 private:
     void dispatch(std::string_view prefix, std::string_view type, std::string_view body) {
         Reader reader(body);
         GameState d;
-        if (type == "game state") {
-
+        if (type == "pong") {
+            std::cout << "client received pong command!!!!\n";
         }
     }
     // void receive(GameState &state) override {
