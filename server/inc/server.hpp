@@ -11,7 +11,6 @@
 
 
 class Server : public modlib::BmServer {       
-    std::vector<std::unique_ptr<modlib::BmClient>> clients_; 
     ServerNetwork serverNetwork_;
 
     std::unordered_map<std::string, modlib::BmServerModule *> prefixOwners_;
@@ -47,21 +46,43 @@ public:
     }
     
     void forAllClients(const std::function<void(modlib::BmClient* client)> cb) override {
-        assert(cb);
-        for (auto &client : clients_) {
-            cb(client.get());
+        serverNetwork_.forAllClients(cb);
+    }
+
+    void send(Client *client, bmsg::RawMessage msg) {
+        if (!msg.isCorrect()) {
+            std::cerr << "Dropping malformed message (invalid length or header)\n";
+            return;
+        }
+
+        const bmsg::Header* head = msg.header();
+        
+        std::string prefix(static_cast<std::string_view>(head->pref));
+
+        std::unordered_set<modlib::BmServerModule *> curPrefReceives; 
+        for (auto* listener : allPrefixListeners_) {
+            curPrefReceives.insert(listener);
+        }
+        if (prefixListeners_.contains(prefix)) {
+            for (auto* listener : prefixListeners_.at(prefix)) {
+                curPrefReceives.insert(listener);
+            }
+        }
+
+        if (prefixOwners_.contains(prefix)) {
+            curPrefReceives.insert(prefixOwners_[prefix]);
+        } else {
+            std::cerr << "No owner registered for prefix: " << prefix << "\n";
+        }
+
+        modlib::BmClient *serverClient = serverNetwork_.getServerClient(client);
+        for (auto* listener : curPrefReceives) {
+            listener->onMessage(serverClient, msg);
         }
     }
 
-    void send(bmsg::RawMessage msg) {
-        std::cout << "server received message `" << msg.body() << "`\n";
-        // Parse & Dispatch
-    }
-
     void connect(Client *client) {
-        assert(client);
-        auto serverClient = serverNetwork_.connect(client);
-        clients_.push_back(std::move(serverClient));
+        serverNetwork_.connect(client);
     }
 
     void update() {

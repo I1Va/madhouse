@@ -10,7 +10,7 @@ const char MAP_PATH[] = "content/maps/map1";
 const size_t TILE_SZ = 50;
 
 const char MAP_MOD_PATH[]           = "server_plugins/map/build/ida_maplib.so";
-const char GENERAL_LOGIC_MOD_PATH[] = "server_plugins/general_logic/build/ida_maplib.so";
+const char GENERAL_LOGIC_MOD_PATH[] = "build/modules/ida_glogic_mod/libida_bardak_glogic.so";
 const char PACMAN_MOD_PATH[]        = "server_plugins/pacman/build/ida_maplib.so";
 const char TANK_MOD_PATH[]          = "server_plugins/tank/build/ida_maplib.so";
 
@@ -34,13 +34,36 @@ size_t NETWORK_GET_CLIENT_ID(Client *client) {
 }
 
 
+std::vector<char> generateEmptyMessage(std::string_view prefix, 
+                                       std::string_view type, 
+                                       bmsg::Id id, 
+                                       uint16_t flags = 0) {
+    // 1. Prepare the header
+    bmsg::Header head;
+    head.pref = prefix; // Uses Char64(std::string_view) constructor
+    head.type = type;
+    head.id = id;
+    head.len = 0;       // Body is empty
+    head.flags = flags;
+
+    // 2. Create buffer and copy header into it
+    std::vector<char> buffer(sizeof(bmsg::Header));
+    std::memcpy(buffer.data(), &head, sizeof(bmsg::Header));
+    return buffer;
+}
+
 int main() {
     Server server;
 
     ModManager modManager;
 
     // Mod *mapMod              = modManager.loadFromFile(MAP_MOD_PATH);           CHECK_MOD_LOAD(mapMod, MAP_MOD_PATH)
-    // Mod *generalGameLogicMod = modManager.loadFromFile(GENERAL_LOGIC_MOD_PATH); CHECK_MOD_LOAD(generalGameLogicMod, GENERAL_LOGIC_MOD_PATH)
+    Mod *generalGameLogicModRaw = modManager.loadFromFile(GENERAL_LOGIC_MOD_PATH); 
+    CHECK_MOD_LOAD(generalGameLogicModRaw, GENERAL_LOGIC_MOD_PATH)
+    modlib::BmServerModule *generalGameLogicMod = static_cast<modlib::BmServerModule *>(generalGameLogicModRaw);
+    generalGameLogicMod->setServer(&server);
+    generalGameLogicMod->onSetup(&server);
+
     // Mod *pacmanMod           = modManager.loadFromFile(PACMAN_MOD_PATH);        CHECK_MOD_LOAD(pacmanMod, PACMAN_MOD_PATH)
     // Mod *tankMod             = modManager.loadFromFile(TANK_MOD_PATH);          CHECK_MOD_LOAD(tankMod, TANK_MOD_PATH)
 
@@ -54,13 +77,26 @@ int main() {
 
     server.connect(&client);
 
+
+    // struct Header {
+    //     Char64 pref;
+    //     Char64 type;
+    //     Id id;
+    //     uint16_t len;
+    //     uint16_t flags;
+    // };
+
+    std::vector<char> pingMsgBuf = generateEmptyMessage("core", "ping", 0);
+    bmsg::RawMessage pingMsg(std::string_view(pingMsgBuf.data(), pingMsgBuf.size()));
+    
+    server.send(&client, pingMsg);
+
 //     // npc1_init(server, {3, 3});
 //     // npc2_init(server, {9, 15});
 //     // npc3_init(server, {15, 5});
 //     // serverd_npc_script(npc1_step);
 //     // server.add_npc_script(npc2_step);
 //     // server.add_npc_script(npc3_step);
-
 
 
 

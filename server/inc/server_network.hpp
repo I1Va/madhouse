@@ -25,14 +25,35 @@ public:
 };
 
 class ServerNetwork {
+    std::unordered_map<size_t, std::unique_ptr<modlib::BmClient>> clients_; 
 public:
-    std::unique_ptr<modlib::BmClient> connect(Client *client) {
+    void connect(Client *client) {
         assert(client);
-        return std::make_unique<ServerClient>(client);
+
+        auto serverClient = std::make_unique<ServerClient>(client);
+        size_t id = serverClient->id();
+        if (clients_.contains(id)) {
+            std::cerr << "client " << id << "has been already added\n"; 
+            return;
+        }
+        clients_[id] = std::move(serverClient);
+    }
+
+    modlib::BmClient *getServerClient(Client *client) {
+        size_t id = NETWORK_GET_CLIENT_ID(client);
+        if (!clients_.contains(id)) return nullptr;
+        return clients_[id].get();
     }
 
     void send_message_to_client(modlib::BmClient *client, bmsg::RawMessage msg) {
         assert(client);
         client->send(msg);
+    }
+    
+    void forAllClients(const std::function<void(modlib::BmClient* client)> cb) {
+        assert(cb);
+        for (auto &[id, client] : clients_) {
+            cb(client.get());
+        }
     }
 };
