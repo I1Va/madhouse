@@ -9,8 +9,8 @@
 const char MAP_PATH[] = "content/maps/map1";
 const size_t TILE_SZ = 50;
 
-const char MAP_MOD_PATH[]           = "server_plugins/map/build/ida_maplib.so";
-const char GENERAL_LOGIC_MOD_PATH[] = "build/modules/ida_glogic_mod/libida_bardak_glogic.so";
+const char MAP_MOD_PATH[]           = "build/modules/ida_map_mod/libida.bardak.map.so";
+const char GENERAL_LOGIC_MOD_PATH[] = "build/modules/ida_glogic_mod/libida.bardak.glogic.so";
 const char PACMAN_MOD_PATH[]        = "server_plugins/pacman/build/ida_maplib.so";
 const char TANK_MOD_PATH[]          = "server_plugins/tank/build/ida_maplib.so";
 
@@ -43,8 +43,16 @@ int main() {
     CHECK_MOD_LOAD(generalGameLogicModRaw, GENERAL_LOGIC_MOD_PATH)
     modlib::BmServerModule *generalGameLogicMod = static_cast<modlib::BmServerModule *>(generalGameLogicModRaw);
     generalGameLogicMod->setServer(&server);
-    generalGameLogicMod->onSetup(&server);
 
+    Mod *mapModRaw = modManager.loadFromFile(MAP_MOD_PATH); 
+    CHECK_MOD_LOAD(mapModRaw, MAP_MOD_PATH)
+    modlib::BmServerModule *mapMod = static_cast<modlib::BmServerModule *>(mapModRaw);
+    mapMod->setServer(&server);
+    
+
+    generalGameLogicMod->onSetup(&server);
+    mapMod->onSetup(&server);
+    
     // Mod *pacmanMod           = modManager.loadFromFile(PACMAN_MOD_PATH);        CHECK_MOD_LOAD(pacmanMod, PACMAN_MOD_PATH)
     // Mod *tankMod             = modManager.loadFromFile(TANK_MOD_PATH);          CHECK_MOD_LOAD(tankMod, TANK_MOD_PATH)
 
@@ -59,18 +67,13 @@ int main() {
     server.connect(&client);
 
 
-    // struct Header {
-    //     Char64 pref;
-    //     Char64 type;
-    //     Id id;
-    //     uint16_t len;
-    //     uint16_t flags;
-    // };
+    std::vector<char> glogicPingMsgBuf = bmsg::generateEmptyMessage("core", "ping", 0);
+    bmsg::RawMessage glogicPingMsg(std::string_view(glogicPingMsgBuf.data(), glogicPingMsgBuf.size()));
+    server.send(&client, glogicPingMsg);
 
-    std::vector<char> pingMsgBuf = bmsg::generateEmptyMessage("core", "ping", 0);
-    bmsg::RawMessage pingMsg(std::string_view(pingMsgBuf.data(), pingMsgBuf.size()));
-    
-    server.send(&client, pingMsg);
+    std::vector<char> mapPingMsgBuf = bmsg::generateEmptyMessage("map", "ping", 0);
+    bmsg::RawMessage mapPingMsg(std::string_view(mapPingMsgBuf.data(), mapPingMsgBuf.size()));
+    server.send(&client, mapPingMsg);
 
 //     // npc1_init(server, {3, 3});
 //     // npc2_init(server, {9, 15});

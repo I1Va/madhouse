@@ -12,7 +12,7 @@ class IDAGLogicModule : public GLogicModule {
     const std::string modulePrefix = "core"; 
 
 public:
-    std::string_view id() const override { return "ida_bardak_glogic"; }
+    std::string_view id() const override { return "ida.bardak.glogic"; }
     std::string_view brief() const override { return "Core synchronization and tick broadcast"; }
     ModVersion version() const override { return ModVersion(1, 0, 0); }
 

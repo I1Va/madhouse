@@ -24,7 +24,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/client)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bardak)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules/ida_glogic_mod)
-# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules/ida_map_mod)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules/ida_map_mod)
 # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules/ida_tank_mod)
 
 

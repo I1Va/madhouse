@@ -69,7 +69,6 @@ public:
 
     // TEMP
     void send(bmsg::RawMessage msg) {
-        // bmsg::RawMessage msg(buffer);
         if (!msg.isCorrect()) {
             return;
         }
@@ -83,9 +82,8 @@ private:
     void dispatch(std::string_view prefix, std::string_view type, std::string_view body) {
         Reader reader(body);
         GameState d;
-        if (type == "pong") {
-            std::cout << "client received pong command!!!!\n";
-        }
+
+        std::cout << "client received " << prefix << " " << type << " " << body << "\n";
     }
     // void receive(GameState &state) override {
     //     world_.apply_game_state(state);

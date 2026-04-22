@@ -6,15 +6,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
-add_library(${PROJECT_NAME} SHARED
+add_library(ida.bardak.glogic SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ida_glogic_mod.cpp
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories(ida.bardak.glogic PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
+target_link_libraries(ida.bardak.glogic PUBLIC
     modlib-ifc
     modlib
     binmsg
