@@ -22,9 +22,9 @@ endif()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/server ${CMAKE_CURRENT_BINARY_DIR}/server)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/client ${CMAKE_CURRENT_BINARY_DIR}/client)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugins/server/map ${CMAKE_CURRENT_BINARY_DIR}/plugins/server/map)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugins/server/general_logic ${CMAKE_CURRENT_BINARY_DIR}/plugins/server/general_logic)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugins/server/special_logic/tank ${CMAKE_CURRENT_BINARY_DIR}/plugins/server/special_logic/tank)
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugins/server/map ${CMAKE_CURRENT_BINARY_DIR}/plugins/server/map)
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugins/server/general_logic ${CMAKE_CURRENT_BINARY_DIR}/plugins/server/general_logic)
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugins/server/special_logic/tank ${CMAKE_CURRENT_BINARY_DIR}/plugins/server/special_logic/tank)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bardak ${CMAKE_CURRENT_BINARY_DIR}/bardak)
 
@@ -35,9 +35,9 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE server
     PRIVATE client
-    PRIVATE IAMapPlugin
-    PRIVATE IAGeneralLogicPlugin
-    PRIVATE TankLogicPlugin
+    # PRIVATE IAMapPlugin
+    # PRIVATE IAGeneralLogicPlugin
+    # PRIVATE TankLogicPlugin
 
     PRIVATE modlib
 )
