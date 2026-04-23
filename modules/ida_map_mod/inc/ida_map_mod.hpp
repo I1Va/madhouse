@@ -1,12 +1,14 @@
 #pragma once
 #include "modlib_mod.hpp"
-#include "Map.hpp"
+#include "Map.hpp" // Assuming this defines Tile, Unit, Vec2i
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include <algorithm>
 #include <cassert>
 #include <unordered_map>
+#include <memory>
 
 namespace modlib {
 
@@ -16,116 +18,126 @@ class IDATile : public Tile {
     bool isWalkable_;
 
 public:
-    IDATile(const Vec2i pos, const bool isWalkable): 
-        pos_(pos), isWalkable_(isWalkable) {}
-    ~IDATile() = default;
+    IDATile(const Vec2i pos, const bool isWalkable) 
+        : pos_(pos), isWalkable_(isWalkable) {}
+        
+    ~IDATile() = default; 
 
-    
     Vec2i pos() const override { return pos_; }
-    void setPos(const Vec2i newPos) override {pos_ = newPos; }
-
     const std::vector<Unit*> &units() override { return units_; }
+    bool isWalkable() const override { return isWalkable_; }
 
-    void addUnit(Unit *unit) override {
+    void addUnit(Unit *unit) {
+        if (!unit) return;
         auto it = std::find(units_.begin(), units_.end(), unit);
         if (it == units_.end()) {
             units_.push_back(unit);
         }
     }
 
-    void removeUnit(Unit* unit) override {
-        assert(unit);
+    void removeUnit(Unit* unit) {
+        if (!unit) return;
         auto it = std::remove(units_.begin(), units_.end(), unit);        
         if (it != units_.end()) {
             units_.erase(it, units_.end());
         }
     }
-
-    bool isWalkable() const override { return isWalkable_; }
-    void setWalkable(const bool walkable) { isWalkable_ = walkable; }
 };
 
 class IDAMapModule : public Map {
-    const std::string modulePrefix_ = "map"; 
-
     std::unordered_map<size_t, std::unique_ptr<Unit>> units_;
     std::vector<std::vector<std::unique_ptr<IDATile>>> grid_;
-    size_t nextId = 0;
 
-    Unit *addUnit(Vec2i pos, size_t id, std::unique_ptr<Unit> &&u) override {
-        u->setMap(this);
-        u->setTile(at(pos));
-        at(pos)->addUnit(u.get());
-        units_[id] = std::move(u);
-    };
+    Unit *addUnit(Vec2i pos, std::unique_ptr<Unit> &&u) override {
+        assert(u);
+        Unit* ptr = u.get();
+        IDATile *tile = static_cast<IDATile *>(u->tile());
+        if (tile == nullptr) {
+            std::cerr << id() << " failed to cast tile to `IDATile` in `addUnit`\n";
+            return nullptr;
+        }
+    
+        tile->addUnit(ptr);
+        units_[u->id()] = std::move(u);
+        return ptr;
+    }
 
     void moveUnit(Unit *u, Vec2i pos) override {
-        assert(u);
-        
-        u->tile()->removeUnit(u);
-        u->setTile(at(pos));
-        u->tile()->addUnit(u);
+        assert(u && u->tile());
+
+        IDATile *tile = static_cast<IDATile *>(u->tile());
+        if (tile == nullptr) {
+            std::cerr << id() << " failed to cast tile to `IDATile` in `moveUnit`\n";
+            return;
+        }
+
+        tile->removeUnit(u);
+
+        IDATile *nextTile = static_cast<IDATile *>(at(pos));
+        if (tile == nullptr) {
+            std::cerr << id() << " failed to cast nextTile to `IDATile` in `moveUnit`\n";
+            return;
+        }
+
+        if (nextTile) {
+            nextTile->addUnit(u);
+        }
     }
 
     void removeUnit(Unit *u) override {
         assert(u);
-        size_t id = u->id();
-        units_.erase(id);
+        assert(u->tile());
+    
+        IDATile *tile = static_cast<IDATile *>(u->tile());
+        if (tile == nullptr) {
+            std::cerr << id() << " failed to cast tile to `IDATile` in `addUnit`\n";
+            return;
+        }
+
+        tile->removeUnit(u);        
+        units_.erase(u->id());
     }
 
     void initializeGrid() {
         const int width = 20;
         const int height = 20;
-
-        grid_.reserve(height);
+        grid_.resize(height);
 
         for (int y = 0; y < height; ++y) {
-            std::vector<std::unique_ptr<IDATile>> row;
-            row.reserve(width);
-
+            grid_[y].reserve(width);
             for (int x = 0; x < width; ++x) {
-                auto tile = std::make_unique<IDATile>();
-
-                if (x == 0 || x == width - 1 || y == 0 || y == height - 1) {
-                    tile->setWalkable(false); 
-                } else {
-                    tile->setWalkable(true);
-                }
-                row.push_back(std::move(tile));
+                bool wall = (x == 0 || x == width - 1 || y == 0 || y == height - 1);
+                auto tile = std::make_unique<IDATile>(Vec2i{x, y}, !wall);
+                grid_[y].push_back(std::move(tile));
             }
-            grid_.push_back(std::move(row));
         }
     }
 
-  
 public:
     IDAMapModule() {
         initializeGrid();
     }
-    ~IDAMapModule() = default;
+    
+    virtual ~IDAMapModule() = default;
 
     std::string_view id() const override { return "ida.bardak.map"; }
-    std::string_view brief() const override { return "Provides grid and collision detection"; }
+    std::string_view brief() const override { return "Provides tile grid with entities "; }
     ModVersion version() const override { return ModVersion(1, 0, 0); }
 
     Unit *byId(size_t id) override {
-        if (!units_.contains(id)) return nullptr;
-        return units_[id].get();
+        auto it = units_.find(id);
+        return (it != units_.end()) ? it->second.get() : nullptr;
     }
 
     Vec2i size() const override {
-        if (grid_.size() == 0) return {0, 0};
-        return Vec2i(grid_.size(), grid_[0].size());
+        if (grid_.empty()) return {0, 0};
+        return Vec2i(static_cast<int>(grid_[0].size()), static_cast<int>(grid_.size()));
     }
 
     Tile *at(Vec2i pos) override {
-        if (grid_.size() <= pos.x) return nullptr;
-        if (grid_[pos.x].size() <= pos.y) return nullptr;
-        return grid_[pos.x][pos.y].get();
-    }
-
-    size_t getNewUnitId() override {
-        return nextId++;
+        if (pos.y < 0 || pos.y >= (int)grid_.size()) return nullptr;
+        if (pos.x < 0 || pos.x >= (int)grid_[pos.y].size()) return nullptr;
+        return grid_[pos.y][pos.x].get();
     }
 };
 

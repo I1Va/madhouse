@@ -44,14 +44,10 @@ int main() {
     modlib::BmServerModule *generalGameLogicMod = static_cast<modlib::BmServerModule *>(generalGameLogicModRaw);
     generalGameLogicMod->setServer(&server);
 
-    Mod *mapModRaw = modManager.loadFromFile(MAP_MOD_PATH); 
-    CHECK_MOD_LOAD(mapModRaw, MAP_MOD_PATH)
-    modlib::BmServerModule *mapMod = static_cast<modlib::BmServerModule *>(mapModRaw);
-    mapMod->setServer(&server);
+    Mod *mapMod = modManager.loadFromFile(MAP_MOD_PATH); 
     
 
     generalGameLogicMod->onSetup(&server);
-    mapMod->onSetup(&server);
     
     // Mod *pacmanMod           = modManager.loadFromFile(PACMAN_MOD_PATH);        CHECK_MOD_LOAD(pacmanMod, PACMAN_MOD_PATH)
     // Mod *tankMod             = modManager.loadFromFile(TANK_MOD_PATH);          CHECK_MOD_LOAD(tankMod, TANK_MOD_PATH)
@@ -71,9 +67,6 @@ int main() {
     bmsg::RawMessage glogicPingMsg(std::string_view(glogicPingMsgBuf.data(), glogicPingMsgBuf.size()));
     server.send(&client, glogicPingMsg);
 
-    std::vector<char> mapPingMsgBuf = bmsg::generateEmptyMessage("map", "ping", 0);
-    bmsg::RawMessage mapPingMsg(std::string_view(mapPingMsgBuf.data(), mapPingMsgBuf.size()));
-    server.send(&client, mapPingMsg);
 
 //     // npc1_init(server, {3, 3});
 //     // npc2_init(server, {9, 15});
